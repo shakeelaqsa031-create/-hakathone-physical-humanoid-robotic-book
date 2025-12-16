@@ -1,0 +1,101 @@
+---
+id: module-1
+title: "Module 1: Modern AI Engineering"
+sidebar_label: Module 1
+sidebar_position: 2
+---
+
+import AdaptiveContent from '../src/components/AdaptiveContent';
+import { useUser } from '../src/contexts/UserContext';
+
+# Module 1: Modern AI Engineering
+
+<AdaptiveContent>
+Welcome to the definitive guide on **Physical AI & Humanoid Robotics**. This module lays the theoretical and practical foundation for the entire course. We are not just building software; we are building minds for bodies.
+</AdaptiveContent>
+
+## 1.1 Introduction to Physical AI
+
+<AdaptiveContent level="beginner">
+**Summary**: Physical AI is the field where "brains" meet "bodies". While tools like ChatGPT live on servers, Physical AI (or Embodied AI) lives inside robots that must move, touch, and change the world around them.
+</AdaptiveContent>
+
+<AdaptiveContent level="advanced">
+Physical AI represents a paradigm shift from disembodied intelligence (like LLMs) to **Embodied Intelligence**. It addresses the challenge of interacting with the unstructured, chaotic physical world.
+
+### The Core Challenge: Moravec's Paradox
+> "It is comparatively easy to make computers exhibit adult level performance on intelligence tests or playing checkers, and difficult or impossible to give them the skills of a one-year-old when it comes to perception and mobility." — Hans Moravec
+
+We are solving this by combining:
+1.  **Classical Control**: Precise, mathematically guaranteed movement (e.g., PID controllers).
+2.  **Deep Learning**: Perception and high-level reasoning (e.g., Transformers, CNNs).
+3.  **Simulation**: Infinite training data without physical risk (e.g., Isaac Sim, MuJoCo).
+</AdaptiveContent>
+
+## 1.2 The Hardware Landscape
+Software cannot exist without hardware. Understanding the physical constraints is crucial for a Physical AI Engineer.
+
+### Sensors: The Eyes and Ears
+-   **LiDAR (Light Detection and Ranging)**: Uses laser pulses to create a 3D point cloud map of the world. Essential for navigation (SLAM).
+    -   *Pros*: Very accurate depth.
+    -   *Cons*: Expensive, struggles with glass/mirrors.
+-   **Depth Cameras (RGB-D)**: Like Intel RealSense or Oak-D. They provide color (RGB) and distance (Depth) per pixel.
+    -   *Use Case*: Object recognition and manipulation.
+-   **IMU (Inertial Measurement Unit)**: The "inner ear". Measures acceleration and rotation speed. Critical for balance in humanoids.
+
+### Actuators: The Muscles
+-   **BLDC Motors (Brushless DC)**: The gold standard for robotics. High efficiency, high torque, long life. Used with **FOC (Field Oriented Control)** drivers.
+-   **Harmonic Drives**: A type of gear system that offers zero backlash (no "wiggle" in the joint) and high torque density. Essential for precise arm movements.
+-   **Series Elastic Actuators (SEA)**: Motors with a spring involved. They make robots "bouncy" and safe to interact with humans.
+
+## 1.3 The Physical AI Tech Stack
+
+To build a humanoid robot or a smart manipulator, you need to understand the full stack:
+
+1.  **Hardware Layer**: Motors, Sensors, Compute (NVIDIA Jetson Orin, x86 IPCs).
+2.  **Driver Layer**: Firmware that talks to hardware (CAN bus, EtherCAT).
+3.  **Middleware (ROS 2)**: The "glue" that allows modular software development.
+4.  **Planning & Control**: Inverse Kinematics (IK), Path Planning (RRT*, A*), MPC (Model Predictive Control).
+5.  **Intelligence Layer**: VLA models, Reinforcement Learning policies.
+
+## 1.4 Setting Up Your Development Environment
+
+Before writing code, we need a robust environment. We rely heavily on Linux (Ubuntu 22.04/24.04) and Docker.
+
+### Prerequisites
+- **OS**: Ubuntu 22.04 LTS (Recommended) or Windows 11 with WSL2.
+- **GPU**: NVIDIA RTX series (for Isaac Sim & Model Training).
+- **RAM**: 32GB+ recommended.
+
+### 1. Install Docker & NVIDIA Container Toolkit
+We use Docker to keep our ROS 2 and AI dependencies isolated.
+
+```bash
+# 1. Install Docker
+sudo apt-get update
+sudo apt-get install -y docker.io
+
+# 2. Install NVIDIA Container Toolkit (allows Docker to use your GPU)
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+sudo apt-get update
+sudo apt-get install -y nvidia-container-toolkit
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+```
+
+### 2. Verify Setup
+Run a CUDA-enabled container to check if your GPU is visible:
+
+```bash
+sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
+```
+
+## 1.5 Safety & Ethics
+When code moves motors, bugs can cause physical damage.
+-   **Emergency Stop (E-Stop)**: Every robot must have a hardware button that cuts power to motors instantly.
+-   **Force Limiting**: Software should limit how much force a robot can apply.
+-   **Sim-First**: Always test code in simulation before the real robot.

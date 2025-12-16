@@ -1,0 +1,181 @@
+/**
+ * Deep Space Dark & Neon Future Theme
+ * Goal: Physical AI & Humanoid Robotics Aesthetic
+ */
+
+:root {
+  /* Core Colors */
+  --site-primary-color: #A855F7; /* Neon Purple */
+  --site-secondary-color: #3B82F6; /* Neon Blue */
+  --site-bg-color: #0A0F1F; /* Deep Space Dark */
+  --site-glass-bg: rgba(20, 25, 45, 0.7);
+  --site-glass-border: rgba(168, 85, 247, 0.3);
+  --site-text-color: #E2E8F0; /* Cool Gray */
+  --site-heading-color: #FFFFFF;
+  
+  /* Docusaurus Infima Overrides (Forcing Dark Theme Look) */
+  --ifm-color-primary: var(--site-primary-color);
+  --ifm-color-primary-dark: #9333ea;
+  --ifm-color-primary-darker: #7e22ce;
+  --ifm-color-primary-darkest: #6b21a8;
+  --ifm-color-primary-light: #c084fc;
+  --ifm-color-primary-lighter: #d8b4fe;
+  --ifm-color-primary-lightest: #f3e8ff;
+
+  --ifm-background-color: var(--site-bg-color);
+  --ifm-font-color-base: var(--site-text-color);
+  --ifm-heading-color: var(--site-heading-color);
+  
+  /* Navbar */
+  --ifm-navbar-background-color: rgba(10, 15, 31, 0.6); /* Transparent */
+  --ifm-navbar-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  --ifm-navbar-link-hover-color: var(--site-primary-color);
+  
+  /* Sidebar */
+  --ifm-menu-color: var(--site-text-color);
+  --ifm-menu-color-active: var(--site-primary-color);
+}
+
+/* Force Dark Mode visuals even if system is light (Optional, but ensures consistency) */
+[data-theme='light'] {
+  --ifm-background-color: var(--site-bg-color);
+  --ifm-font-color-base: var(--site-text-color);
+  --ifm-navbar-background-color: rgba(10, 15, 31, 0.6);
+}
+
+body {
+  background-color: var(--site-bg-color);
+  background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0A0F1F 60%);
+  background-attachment: fixed;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Glassmorphism Utility */
+.glass-panel {
+  background: var(--site-glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--site-glass-border);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+}
+
+/* Neon Glow Utility */
+.neon-glow {
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+}
+
+.neon-text {
+  text-shadow: 0 0 10px rgba(168, 85, 247, 0.7);
+}
+
+/* Navbar Customization */
+.navbar {
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.navbar__title {
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: linear-gradient(90deg, #fff, #A855F7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Custom Sign In Button */
+.navbar__item.cta-btn {
+  background: linear-gradient(135deg, #A855F7 0%, #3B82F6 100%);
+  color: white !important;
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+}
+
+.navbar__item.cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.7);
+  color: white;
+  text-decoration: none;
+}
+
+/* Chat Widget Customization */
+.chat-widget-container {
+  /* Positioned by React inline styles usually, but we can override */
+}
+
+.chat-toggle-btn {
+  background: var(--site-bg-color);
+  border: 2px solid var(--site-primary-color);
+  box-shadow: 0 0 15px var(--site-primary-color);
+  animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
+}
+
+.chat-window {
+  /* Glassmorphism for the window */
+  background: rgba(15, 23, 42, 0.9) !important;
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--site-primary-color);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.chat-header {
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.2), transparent);
+  border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+/* Home Page Hero Custom Styles */
+.hero-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-content-left {
+  z-index: 10;
+  padding: 2rem;
+}
+
+.hero-visual-right {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.robot-hologram-placeholder {
+  width: 300px;
+  height: 400px;
+  background: linear-gradient(180deg, rgba(168, 85, 247, 0.1), rgba(59, 130, 246, 0.1));
+  border: 1px solid rgba(168, 85, 247, 0.5);
+  border-radius: 20px;
+  position: relative;
+  box-shadow: 0 0 50px rgba(168, 85, 247, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--site-primary-color);
+  font-family: monospace;
+}
+
+.spotlight-effect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%);
+  z-index: -1;
+}

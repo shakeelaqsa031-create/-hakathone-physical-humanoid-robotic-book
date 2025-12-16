@@ -1,0 +1,21 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from backend.src.api import auth_routes, profile_routes, chat_routes
+
+app = FastAPI(title="AI Textbook API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # For dev
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(auth_routes.router, prefix="/api")
+app.include_router(profile_routes.router, prefix="/api")
+app.include_router(chat_routes.router, prefix="/api")
+
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to AI Textbook API"}

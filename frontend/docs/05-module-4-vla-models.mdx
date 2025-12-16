@@ -1,0 +1,63 @@
+---
+id: module-4
+title: "Module 4: Vision-Language-Action (VLA) Models"
+sidebar_label: "Module 4: VLA Models"
+sidebar_position: 5
+---
+
+import AdaptiveContent from '../src/components/AdaptiveContent';
+
+# Module 4: Vision-Language-Action (VLA) Models
+
+<AdaptiveContent level="beginner">
+**Summary**: VLA models are the "General Intelligence" of robotics. Instead of writing code for every specific movement, we train a giant AI model to understand the world and move the robot, just by showing it millions of examples.
+</AdaptiveContent>
+
+<AdaptiveContent level="advanced">
+**Deep Dive**: A **Vision-Language-Action (VLA)** model maps perceptual inputs (Pixels, Text) directly to control outputs (Joint Torques/Positions). It bypasses the traditional pipeline of "Perception -> State Estimation -> Planning -> Control".
+</AdaptiveContent>
+
+## 4.1 How VLA Models Work (RT-2)
+
+The breakthrough of RT-2 (Robotic Transformer 2) was treating **Actions as Language**.
+
+### Tokenization of the Physical World
+Large Language Models (LLMs) output "tokens" (parts of words). RT-2 extends this vocabulary.
+-   **Text Tokens**: "Pick", "up", "apple" -> IDs: `[102, 55, 89]`
+-   **Action Tokens**: RT-2 quantizes action values (0 to 255) into tokens.
+    -   `Action x=0.5` -> Token `<128>`
+    -   `Gripper=Closed` -> Token `<0>`
+
+**The Model's Output**:
+"I will pick up the apple." `<128>` `<200>` `<50>` `<0>`
+(Text Reasoning) + (Physical Motion)
+
+## 4.2 Training Pipeline
+
+### 1. Pre-training (The Foundation)
+Start with a massive VLM (Vision-Language Model) like PaLM-E or LLaVA. It already understands objects, colors, and reasoning.
+
+### 2. Co-Fine-Tuning (The Skill)
+We don't just train on robot data. We train on a mix:
+-   **60% Internet Data**: Maintains common sense / reasoning.
+-   **40% Robot Trajectory Data**: Teaches motor skills.
+This prevents **Catastrophic Forgetting**, ensuring the robot doesn't become "dumber" while learning to move.
+
+## 4.3 The Data Problem: Open X-Embodiment
+Robotics has no "Internet" of data. We had to build it.
+**Open X-Embodiment** is a massive collaboration (Google, Berkeley, Stanford, etc.) to pool robot data.
+-   **22+ Robot Types**: Franka, UR5, WidowX, etc.
+-   **1M+ Trajectories**: Examples of picking, placing, opening drawers.
+-   **Goal**: Create a "Generalist Agent" that can control *any* robot arm, not just the one it was trained on.
+
+## 4.4 Efficient Fine-Tuning (LoRA)
+Retraining a 70B parameter model is impossible for most labs.
+We use **LoRA (Low-Rank Adaptation)**.
+-   Instead of changing all 70B weights, we freeze them.
+-   We add tiny "adapter" layers (maybe 1% of total size) and only train those.
+-   **Result**: You can fine-tune a massive VLA on a single consumer GPU (like an RTX 4090).
+
+## 4.5 Challenges & Future
+1.  **Hz (Frequency)**: VLAs run at 3-5 Hz. Robots need 50-100 Hz. We currently use VLAs for "Waypoints" and a local IK controller to smooth the path between them.
+2.  **Proprioception**: Most VLAs only see via camera. They lack the "feeling" of touch (haptics) or knowing exactly where their arm is blindly.
+3.  **Long-Horizon Planning**: VLAs are good at "Pick apple". Bad at "Clean the whole kitchen" (which requires 500 steps).

@@ -1,0 +1,79 @@
+---
+id: module-3
+title: "Module 3: Simulation with Gazebo & NVIDIA Isaac"
+sidebar_label: "Module 3: Simulation"
+sidebar_position: 4
+---
+
+import AdaptiveContent from '../src/components/AdaptiveContent';
+
+# Module 3: Simulation with Gazebo & NVIDIA Isaac
+
+<AdaptiveContent level="beginner">
+**Summary**: Training robots in the real world is slow, expensive, and dangerous. We use "video game" worlds (Simulators) to teach them safely. If a robot falls in simulation, we just press reset.
+</AdaptiveContent>
+
+<AdaptiveContent level="advanced">
+**Deep Dive**: Modern robotics relies on **Sim2Real** (Simulation to Reality). We need simulators that are physically accurate (contact physics, friction, gravity) and visually photorealistic (for vision models).
+</AdaptiveContent>
+
+## 3.1 The Simulators
+
+### Gazebo (Classic / Ignition)
+- **Engine**: ODE/Bullet/Dart (Physics), OGRE (Rendering).
+- **Pros**: The "standard" for years. Lightweight. Great for testing logic.
+- **Cons**: Not photorealistic enough for modern computer vision.
+
+### NVIDIA Isaac Sim (Omniverse)
+- **Engine**: PhysX 5 (GPU-accelerated Physics), RTX (Ray Tracing).
+- **Pros**: Photorealistic. Supports massive parallel training (thousands of robots at once).
+- **Cons**: Requires NVIDIA RTX GPU.
+
+## 3.2 Key Concepts in Isaac Sim
+
+### USD (Universal Scene Description)
+The file format of the metaverse. It layers geometry, physics, and lighting into one file structure.
+- **Composition**: You can "reference" a robot file into a world file. If you update the robot file, the world updates automatically.
+
+### The ROS 2 Bridge
+Simulators must talk to your code. The **ROS 2 Bridge** connects the USD world to ROS topics.
+- **Clock**: Synchronizes simulation time with ROS time.
+- **TF**: Publishes the position of every robot joint.
+- **Sensors**: Simulates Lidar, Cameras, IMUs and publishes standard ROS messages.
+
+## 3.3 Reinforcement Learning (RL) in Simulation
+
+This is the "killer app" for simulation.
+**The Loop**:
+1.  **Observation ($O_t$)**: The robot sees its state (joint angles, camera pixels).
+2.  **Policy ($\pi$)**: The AI brain decides what to do.
+3.  **Action ($A_t$)**: The robot applies torques to its motors.
+4.  **Reward ($R_t$)**: The simulator calculates a score (Did you walk? +1. Did you fall? -10).
+
+In Isaac Sim, we use **Isaac Lab (formerly Orbit)** for this. It runs the physics on the GPU, so we need not copy data back to the CPU, making it 1000x faster than traditional learning.
+
+### Configuration Example (YAML)
+```yaml
+# robot_config.yaml
+viewer:
+  eye: [2.5, 2.5, 2.5]
+  lookat: [0.0, 0.0, 0.0]
+
+env:
+  num_envs: 4096  # Train 4096 robots at the same time!
+  episode_length: 500
+
+robot:
+  # Randomize the mass to make the policy robust
+  randomization:
+    mass:
+      low: 0.9
+      high: 1.1
+```
+
+## 3.4 Domain Randomization
+If the simulation is *perfect*, the robot fails in the real world because the real world is messy.
+**Domain Randomization** intentionally breaks the simulation to make the AI robust.
+-   **Visual**: Randomize floor colors, light positions, textures.
+-   **Physical**: Randomize friction, robot mass, motor strength.
+-   **Result**: The AI stops relying on "cheats" (like the exact shade of grey of the floor) and learns the true physics of walking.

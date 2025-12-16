@@ -1,0 +1,125 @@
+---
+id: module-2
+title: "Module 2: Robot Operating System 2 (ROS 2)"
+sidebar_label: "Module 2: ROS 2"
+sidebar_position: 3
+---
+
+import AdaptiveContent from '../src/components/AdaptiveContent';
+
+# Module 2: Robot Operating System 2 (ROS 2)
+
+<AdaptiveContent level="beginner">
+**Summary**: ROS 2 is the standard software for building robots. Imagine a robot has a camera, wheels, and a brain. ROS 2 acts like a phone network, allowing the camera to "call" the brain to say what it sees, and the brain to "text" the wheels to tell them to move.
+</AdaptiveContent>
+
+<AdaptiveContent level="advanced">
+**Deep Dive**: ROS 2 is a middleware based on **DDS (Data Distribution Service)**. It handles discovery (nodes finding each other automatically) and serialization (turning objects into bytes for transmission). It supports real-time systems, which is critical for balancing a humanoid.
+</AdaptiveContent>
+
+## 2.1 Core Concepts
+
+### Nodes & The Graph
+A **Node** is a single process. The **ROS Graph** is the network of all connected nodes.
+- **Lifecycle**: Nodes can be managed (Unconfigured -> Inactive -> Active -> Finalized). This is crucial for safety (e.g., don't turn on high-power motors until checks pass).
+
+### Communication Patterns
+1.  **Topics (Pub/Sub)**: Many-to-many, streaming data (Lidar, Cameras).
+2.  **Services (Req/Res)**: One-to-one, synchronous (Configuration, Status checks).
+3.  **Actions (Goal/Feedback/Result)**: Long-running tasks with progress updates (e.g., "Go to the kitchen").
+
+## 2.2 Hands-on: Publisher & Subscriber
+
+We will create a "Talker" (Publisher) and a "Listener" (Subscriber).
+
+### The Publisher (Talker)
+Sends velocity commands.
+
+```python title="velocity_publisher.py"
+import rclpy
+from rclpy.node import Node
+from geometry_msgs.msg import Twist
+
+class VelocityPublisher(Node):
+    def __init__(self):
+        super().__init__('velocity_publisher')
+        self.publisher_ = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.timer = self.create_timer(0.5, self.timer_callback)
+
+    def timer_callback(self):
+        msg = Twist()
+        msg.linear.x = 0.5
+        msg.angular.z = 0.2
+        self.publisher_.publish(msg)
+        self.get_logger().info(f'Publishing: Linear={msg.linear.x}')
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = VelocityPublisher()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
+```
+
+### The Subscriber (Listener)
+Listens to those commands and prints them.
+
+```python title="velocity_subscriber.py"
+import rclpy
+from rclpy.node import Node
+from geometry_msgs.msg import Twist
+
+class VelocitySubscriber(Node):
+    def __init__(self):
+        super().__init__('velocity_subscriber')
+        # Create a subscription to '/cmd_vel'
+        self.subscription = self.create_subscription(
+            Twist,
+            '/cmd_vel',
+            self.listener_callback,
+            10)
+        self.subscription  # prevent unused variable warning
+
+    def listener_callback(self, msg):
+        self.get_logger().info(f'I heard: Move forward at {msg.linear.x} m/s')
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = VelocitySubscriber()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
+```
+
+## 2.3 The Workspace & Build System (`colcon`)
+In ROS 2, you don't just run Python scripts; you build packages.
+1.  **Create Workspace**: `mkdir -p ~/ros2_ws/src`
+2.  **Create Package**: `cd src && ros2 pkg create --build-type ament_python my_robot_pkg`
+3.  **Build**: `cd ~/ros2_ws && colcon build`
+4.  **Source**: `source install/setup.bash`
+
+This process sets up all the paths so your nodes can find each other.
+
+## 2.4 Launch Files
+Starting 20 nodes manually is impossible. We use **Launch Files** (Python, XML, or YAML) to start the whole robot.
+
+```python title="robot_launch.py"
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    return LaunchDescription([
+        Node(
+            package='my_robot_pkg',
+            executable='velocity_publisher',
+            name='publisher'
+        ),
+        Node(
+            package='my_robot_pkg',
+            executable='velocity_subscriber',
+            name='subscriber'
+        )
+    ])
+```
+
+Run it with: `ros2 launch my_robot_pkg robot_launch.py`
